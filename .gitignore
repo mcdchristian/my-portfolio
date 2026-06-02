@@ -1,0 +1,90 @@
+# Node modules
+node_modules/
+
+# Dependency directories
+.pnp/
+.pnp.js
+
+# Vite / build
+dist/
+build/
+out/
+.vite/
+.vite-deps/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+.nyc_output/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Mac OS
+.AppleDouble
+.LSOverride
+
+# Temp files
+tmp/
+temp/
+.cache/
+
+# Parcel, Rollup, Next, Nuxt caches
+.parcel-cache/
+.next/
+.nuxt/
+.cache/
+
+# Test outputs
+jest-cache/
+coverage/
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.p12
+
+# Generated files
+dist-*/
+build-*/
+
+# Misc
+*.tgz
+*.zip
+*.tar.gz
+
+# local history
+.history/
+
+# Ignore environment specific config
+.envrc
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Misc editors
+*.log
+
+# Ignore anything in /archive if you choose to keep originals there
+# archive/
