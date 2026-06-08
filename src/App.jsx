@@ -1,7 +1,59 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Skills from './components/Skills'
+import emailjs from '@emailjs/browser'
 
 export default function App(){
+  const [sending, setSending] = useState(false)
+
+  async function handleSubmit(e){
+    e.preventDefault()
+    setSending(true)
+    const form = e.target
+    const formData = new FormData(form)
+    const templateParams = {
+      from_name: formData.get('name'),
+      from_email: formData.get('email'),
+      subject: formData.get('subject'),
+      message: formData.get('message'),
+      to_email: import.meta.env.VITE_CONTACT_EMAIL || 'mutalikodelor@gmail.com'
+    }
+
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+    // debug: log presence of env vars (no secrets)
+    console.debug('EmailJS config presence:', {
+      hasServiceId: !!serviceId,
+      hasTemplateId: !!templateId,
+      hasPublicKey: !!publicKey,
+    })
+
+    if(!serviceId || !templateId || !publicKey){
+      const missing = [
+        !serviceId && 'VITE_EMAILJS_SERVICE_ID',
+        !templateId && 'VITE_EMAILJS_TEMPLATE_ID',
+        !publicKey && 'VITE_EMAILJS_PUBLIC_KEY'
+      ].filter(Boolean)
+      alert(`EmailJS non configuré. Variables manquantes: ${missing.join(', ')}`)
+      setSending(false)
+      return
+    }
+
+    try{
+      const res = await emailjs.send(serviceId, templateId, templateParams, publicKey)
+      console.debug('EmailJS send response:', res)
+      alert("Message envoyé — je vérifierai ma boîte email.")
+      form.reset()
+    }catch(err){
+      console.error('Email send error', err)
+      // try to extract useful info for debugging
+      const errMsg = err?.statusText || err?.text || err?.message || JSON.stringify(err)
+      alert(`Échec de l'envoi. Détails: ${errMsg}`)
+    }finally{
+      setSending(false)
+    }
+  }
   return (
     <>
       <div className="glow glow-1" />
@@ -113,7 +165,7 @@ export default function App(){
             <div className="project-header">
               <div className="project-icon">🔐</div>
               <div className="project-links">
-                <a href="#" className="project-link" title="GitHub"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="https://github.com/mcdchristian/api-auth-management.git" className="project-link" title="GitHub" target="_blank" rel="noreferrer"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
               </div>
             </div>
             <h3 className="project-title">API Auth & User Management</h3>
@@ -128,7 +180,7 @@ export default function App(){
             <div className="project-header">
               <div className="project-icon">🛒</div>
               <div className="project-links">
-                <a href="#" className="project-link" title="GitHub"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="https://github.com/mcdchristian/mcd-full-e-commerce.git" className="project-link" title="GitHub" target="_blank" rel="noreferrer"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
               </div>
             </div>
             <h3 className="project-title">E-Commerce REST API</h3>
@@ -143,7 +195,7 @@ export default function App(){
             <div className="project-header">
               <div className="project-icon">🏢</div>
               <div className="project-links">
-                <a href="#" className="project-link" title="GitHub"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="https://github.com/mcdchristian/erp-interne-manage.git" className="project-link" title="GitHub" target="_blank" rel="noreferrer"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
               </div>
             </div>
             <h3 className="project-title">ERP Interne (Gestion)</h3>
@@ -158,7 +210,7 @@ export default function App(){
             <div className="project-header">
               <div className="project-icon">⚙️</div>
               <div className="project-links">
-                <a href="#" className="project-link" title="GitHub"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="https://github.com/mcdchristian/gorilla-secure.git" className="project-link" title="GitHub" target="_blank" rel="noreferrer"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
               </div>
             </div>
             <h3 className="project-title">Portfolio Admin Panel</h3>
@@ -256,14 +308,14 @@ export default function App(){
             </div>
           </div>
 
-          <form className="contact-form" onSubmit={e => e.preventDefault()}>
+          <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-row">
-              <div className="form-group"><label>Nom</label><input type="text" placeholder="John Doe"/></div>
-              <div className="form-group"><label>Email</label><input type="email" placeholder="john@exemple.com"/></div>
+              <div className="form-group"><label>Nom</label><input name="name" type="text" placeholder="John Doe" required/></div>
+              <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="john@exemple.com" required/></div>
             </div>
-            <div className="form-group"><label>Sujet</label><input type="text" placeholder="Projet freelance, collaboration..."/></div>
-            <div className="form-group"><label>Message</label><textarea placeholder="Parlez-moi de votre projet..."></textarea></div>
-            <button className="form-submit">Envoyer le message →</button>
+            <div className="form-group"><label>Sujet</label><input name="subject" type="text" placeholder="Projet freelance, collaboration..." required/></div>
+            <div className="form-group"><label>Message</label><textarea name="message" placeholder="Parlez-moi de votre projet..." required></textarea></div>
+            <button className="form-submit" type="submit">{sending ? 'Envoi...' : 'Envoyer le message →'}</button>
           </form>
         </div>
       </section>
